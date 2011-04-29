@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_Include", "Include\__include.vcproj", "{D83A4D1C-C829-4D94-87E5-0B6675E7A613}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app2", "app2\app2.vcproj", "{9D17C1C8-2304-46FC-B17C-EE72D4183D11}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D83A4D1C-C829-4D94-87E5-0B6675E7A613}.Debug|Win32.ActiveCfg = Release|Win32
+		{D83A4D1C-C829-4D94-87E5-0B6675E7A613}.Debug|Win32.Build.0 = Release|Win32
+		{D83A4D1C-C829-4D94-87E5-0B6675E7A613}.Release|Win32.ActiveCfg = Release|Win32
+		{D83A4D1C-C829-4D94-87E5-0B6675E7A613}.Release|Win32.Build.0 = Release|Win32
+		{9D17C1C8-2304-46FC-B17C-EE72D4183D11}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9D17C1C8-2304-46FC-B17C-EE72D4183D11}.Debug|Win32.Build.0 = Debug|Win32
+		{9D17C1C8-2304-46FC-B17C-EE72D4183D11}.Release|Win32.ActiveCfg = Release|Win32
+		{9D17C1C8-2304-46FC-B17C-EE72D4183D11}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		VisualSVNWorkingCopyRoot = 
+	EndGlobalSection
+EndGlobal
