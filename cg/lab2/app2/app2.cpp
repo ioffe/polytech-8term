@@ -173,10 +173,10 @@ struct render_data
    int win_w;
    int win_h;
    HDC dc;
-   HANDLE hmutex;
+   boost::scoped_ptr<lock::critsec> cs;
 
    render_data()
-      : hmutex(CreateMutex(NULL, FALSE, NULL))
+      : cs(new lock::critsec())
    {
    }
 };
@@ -185,7 +185,7 @@ static render_data rd;
 DWORD WINAPI thread_fun(LPVOID data)
 {
    render_data * rd = (render_data *)data;
-   render(rd->win_w, rd->win_h, rd->dc, &rd->is_alive, rd->hmutex);
+   render(rd->win_w, rd->win_h, rd->dc, &rd->is_alive, rd->cs.get());
    return 0;
 }
 
@@ -250,9 +250,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       {
 		   hdc = BeginPaint(hWnd, &ps);
 
-         WaitForSingleObject(rd.hmutex, INFINITE);
+         rd.cs->lock();
          BOOL res = BitBlt(hdc, 0, 0, _width, _height, _hdc, 0, 0, SRCCOPY);
-         ReleaseMutex(rd.hmutex);
+         rd.cs->unlock();
 
 		   EndPaint(hWnd, &ps);
       }
@@ -264,6 +264,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       _width = LOWORD(lParam);
       _height = HIWORD(lParam);
       create_buffer(hWnd);
+      break;
+   case WM_KEYUP:
+      if (wParam == VK_F5)
+         create_buffer(hWnd);
       break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);

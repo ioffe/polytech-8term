@@ -9,21 +9,29 @@ static double _screen_max_z = 10.0;
 
 static int _win_w;
 static int _win_h;
+static double _ratio;
+static double _yfov;
+static double _xfov;
+
+static point_3 _xy;
+static point_3 _ext_x;
+static point_3 _ext_y;
 
 static tracer tr;
 
+const point_3 origin(0, -20, 0);
+const cpr dir(0, 0, 0);
+const double fov = 30;
+
+
 static colorf trace(int scr_x, int scr_y)
 {
-   point_3 glb_pos(
-      _screen_max_x * (((_win_w / 2) - scr_x) / (_win_w / 2.0)), 
-      _screen_pos_y, 
-      _screen_max_z * (((_win_h / 2) - scr_y)/ (_win_h/ 2.0)));
+   double x_pos_norm = ((double)scr_x) / (_win_w);
+   double y_pos_norm = ((double)scr_y) / (_win_h);
 
-   point_3 glb_dir = cg::normalized_safe(glb_pos);
-   //float color = (float)(glb_dir * point_3(0, 1, 0));
-   //return colorf(color, color, color);
+   point_3 glb_dir = cg::normalized(_xy + x_pos_norm * _ext_x + y_pos_norm * _ext_y);
 
-   return tr.trace(point_3(), glb_dir);
+   return tr.trace(origin, glb_dir);
 }
 
 struct stored_pixel
@@ -40,9 +48,9 @@ const int stored_max = 1024;
 static int stored_count = 0;
 static stored_pixel pixels[stored_max];
 
-void commit(HDC dc, HANDLE mutex)
+void commit(HDC dc, lock::critsec * cs)
 {
-      WaitForSingleObject(mutex, INFINITE);
+      cs->lock();
          for (int i = 0; i < stored_count; ++i)
          {
             int x = pixels[i].x;
@@ -55,22 +63,42 @@ void commit(HDC dc, HANDLE mutex)
             RECT r = {x, y, x + 1, y + 1};
             SetPixel(dc, x, y, RGB(color.r * 255, color.g * 255, color.b * 255));
          }
-      ReleaseMutex(mutex);
+      cs->unlock();
       stored_count = 0;
 }
 
-void store(int x, int y, colorf color, HDC dc, HANDLE mutex)
+void store(int x, int y, colorf color, HDC dc, lock::critsec * cs)
 {
    if (stored_count + 1 >= stored_max)
-      commit(dc, mutex);
+      commit(dc, cs);
 
    pixels[stored_count++] = stored_pixel(x, y, color);
 }
 
-void render(int win_width, int win_height, HDC dc, bool * alive, HANDLE mutex)
+void render(int win_width, int win_height, HDC dc, bool * alive, lock::critsec * cs)
 {
    _win_w = win_width;
    _win_h = win_height;
+
+   _ratio = (double)_win_h / _win_w;
+   if (_ratio > 1)
+   {
+      _xfov = fov / 2;
+      _yfov = _xfov * _ratio / 2;
+   }
+   else
+   {
+      _xfov = fov / _ratio / 2;
+      _yfov = fov / 2;
+   }
+
+   _xy = polar_point_3( 1, -_xfov + dir.course, _yfov + dir.pitch);
+   point_3 xY = polar_point_3( 1, -_xfov + dir.course, -_yfov + dir.pitch);
+   point_3 Xy = polar_point_3( 1, _xfov + dir.course, +_yfov + dir.pitch);
+   _ext_x = Xy - _xy;
+   _ext_y = xY - _xy;
+   double a = _ext_x * _ext_y;
+
    BitBlt(dc, 0, 0, win_width, win_width, NULL, 0, 0, WHITENESS );
    for (int x = 0; x < win_width; ++x)
       for (int y = 0; y < win_height; ++y)
@@ -78,9 +106,9 @@ void render(int win_width, int win_height, HDC dc, bool * alive, HANDLE mutex)
          if (!(*alive))
             return;
 
-         store(x, y, trace(x, y), dc, mutex);
+         store(x, y, trace(x, y), dc, cs);
       }
    if (*alive)
-      commit(dc, mutex);
+      commit(dc, cs);
 }
 

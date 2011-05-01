@@ -34,11 +34,15 @@
 #include "Geometry/primitives/color.h"
 #include "Geometry/primitives/plane.h"
 #include "Geometry/primitives/segment.h"
+#include "Geometry/primitives/polar_point.h"
+#include "Geometry/primitives/turn.h"
 #include "common/PerfCounter.h"
 #include "common/util.h"
+#include "common/lock.h"
 
 #include "boost/optional.hpp"
 #include "boost/shared_ptr.hpp"
+#include "boost/scoped_ptr.hpp"
 
 
 using cg::point_3;
@@ -47,6 +51,8 @@ using cg::colorb;
 using cg::plane;
 using cg::line_3;
 using cg::segment_3;
+using cg::polar_point_3;
+using cg::cpr;
 
 using boost::optional;
 using boost::shared_ptr;
