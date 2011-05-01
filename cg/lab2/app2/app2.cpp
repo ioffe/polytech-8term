@@ -258,6 +258,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       }
 		break;
 	case WM_DESTROY:
+      end_drawing();
 		PostQuitMessage(0);
 		break;
    case WM_SIZE:

@@ -17,7 +17,7 @@ static point_3 _xy;
 static point_3 _ext_x;
 static point_3 _ext_y;
 
-static tracer tr;
+static boost::scoped_ptr<tracer> tr;
 
 const point_3 origin(0, -20, 0);
 const cpr dir(0, 0, 0);
@@ -31,7 +31,7 @@ static colorf trace(int scr_x, int scr_y)
 
    point_3 glb_dir = cg::normalized(_xy + x_pos_norm * _ext_x + y_pos_norm * _ext_y);
 
-   return tr.trace(origin, glb_dir);
+   return tr->trace(origin, glb_dir);
 }
 
 struct stored_pixel
@@ -44,7 +44,7 @@ struct stored_pixel
    {}
 };
 
-const int stored_max = 1024;
+const int stored_max = 1;
 static int stored_count = 0;
 static stored_pixel pixels[stored_max];
 
@@ -77,6 +77,8 @@ void store(int x, int y, colorf color, HDC dc, lock::critsec * cs)
 
 void render(int win_width, int win_height, HDC dc, bool * alive, lock::critsec * cs)
 {
+   tr.reset(new tracer);
+
    _win_w = win_width;
    _win_h = win_height;
 
